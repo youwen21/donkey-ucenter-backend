@@ -2,7 +2,7 @@ package dal
 
 import (
 	"donkey-ucenter/app/model"
-	"donkey-ucenter/app/service/iuser_verification/user_verification_def"
+	"donkey-ucenter/app/service/iverification/verification_def"
 	"donkey-ucenter/apperror"
 	"donkey-ucenter/conf"
 	"errors"
@@ -12,13 +12,13 @@ import (
 
 /*  */
 
-type userVerificationDal struct{}
+type verificationDal struct{}
 
 var (
-	UserVerificationDal = &userVerificationDal{}
+	VerificationDal = &verificationDal{}
 )
 
-func (d *userVerificationDal) GetSessionByModel(m *model.UserVerification) *gorm.DB {
+func (d *verificationDal) GetSessionByModel(m *model.Verification) *gorm.DB {
 	session := d.newSession()
 
 	if m.Id != 0 {
@@ -49,8 +49,8 @@ func (d *userVerificationDal) GetSessionByModel(m *model.UserVerification) *gorm
 	return session
 }
 
-func (d *userVerificationDal) GetSessionByForm(f *user_verification_def.UserVerificationQueryForm) *gorm.DB {
-	session := d.GetSessionByModel(&f.UserVerification)
+func (d *verificationDal) GetSessionByForm(f *verification_def.VerificationQueryForm) *gorm.DB {
+	session := d.GetSessionByModel(&f.Verification)
 
 	if len(f.IdList) > 0 {
 		session.Where("id in (?)", f.IdList)
@@ -59,7 +59,7 @@ func (d *userVerificationDal) GetSessionByForm(f *user_verification_def.UserVeri
 	return session
 }
 
-func (d *userVerificationDal) Count(f *user_verification_def.UserVerificationQueryForm) (int64, error) {
+func (d *verificationDal) Count(f *verification_def.VerificationQueryForm) (int64, error) {
 	session := d.GetSessionByForm(f)
 
 	var total int64
@@ -71,7 +71,7 @@ func (d *userVerificationDal) Count(f *user_verification_def.UserVerificationQue
 	return total, nil
 }
 
-func (d *userVerificationDal) Query(f *user_verification_def.UserVerificationQueryForm) (*user_verification_def.UserVerificationQueryRes, error) {
+func (d *verificationDal) Query(f *verification_def.VerificationQueryForm) (*verification_def.VerificationQueryRes, error) {
 	session := d.GetSessionByForm(f)
 
 	if len(f.OrderBy) > 0 {
@@ -81,7 +81,7 @@ func (d *userVerificationDal) Query(f *user_verification_def.UserVerificationQue
 	}
 
 	var total int64
-	var list []model.UserVerification
+	var list []model.Verification
 
 	if err := session.Count(&total).Error; err != nil {
 		return nil, err
@@ -90,10 +90,10 @@ func (d *userVerificationDal) Query(f *user_verification_def.UserVerificationQue
 		return nil, err
 	}
 
-	return &user_verification_def.UserVerificationQueryRes{Total: total, List: list}, nil
+	return &verification_def.VerificationQueryRes{Total: total, List: list}, nil
 }
 
-func (d *userVerificationDal) GetList(f *user_verification_def.UserVerificationQueryForm) ([]model.UserVerification, error) {
+func (d *verificationDal) GetList(f *verification_def.VerificationQueryForm) ([]model.Verification, error) {
 	session := d.GetSessionByForm(f)
 
 	if len(f.OrderBy) > 0 {
@@ -102,7 +102,7 @@ func (d *userVerificationDal) GetList(f *user_verification_def.UserVerificationQ
 		}
 	}
 
-	var results []model.UserVerification
+	var results []model.Verification
 
 	err := session.Limit(f.Limit()).Offset(f.Offset()).Find(&results).Error
 	if err != nil {
@@ -111,8 +111,8 @@ func (d *userVerificationDal) GetList(f *user_verification_def.UserVerificationQ
 	return results, nil
 }
 
-func (d *userVerificationDal) GetAll() ([]model.UserVerification, error) {
-	var results []model.UserVerification
+func (d *verificationDal) GetAll() ([]model.Verification, error) {
+	var results []model.Verification
 
 	session := d.newSession()
 	err := session.Find(&results).Error
@@ -122,8 +122,8 @@ func (d *userVerificationDal) GetAll() ([]model.UserVerification, error) {
 	return results, nil
 }
 
-func (d *userVerificationDal) Get(pk int) (*model.UserVerification, error) {
-	info := &model.UserVerification{}
+func (d *verificationDal) Get(pk int) (*model.Verification, error) {
+	info := &model.Verification{}
 	session := d.newSession()
 	if err := session.Where("`id`= ?", pk).First(info).Error; err != nil {
 		return nil, err
@@ -132,10 +132,10 @@ func (d *userVerificationDal) Get(pk int) (*model.UserVerification, error) {
 	return info, nil
 }
 
-func (d *userVerificationDal) GetBy(m *model.UserVerification) (*model.UserVerification, error) {
+func (d *verificationDal) GetBy(m *model.Verification) (*model.Verification, error) {
 	session := d.GetSessionByModel(m)
 
-	info := &model.UserVerification{}
+	info := &model.Verification{}
 
 	session.Order("`id` DESC")
 
@@ -146,8 +146,8 @@ func (d *userVerificationDal) GetBy(m *model.UserVerification) (*model.UserVerif
 	return info, nil
 }
 
-func (d *userVerificationDal) GetLisByPkList(pkList []int) ([]model.UserVerification, error) {
-	var results []model.UserVerification
+func (d *verificationDal) GetLisByPkList(pkList []int) ([]model.Verification, error) {
+	var results []model.Verification
 
 	session := d.newSession()
 	query := session.Where("`id` IN ?", pkList)
@@ -155,12 +155,12 @@ func (d *userVerificationDal) GetLisByPkList(pkList []int) ([]model.UserVerifica
 	return results, err
 }
 
-func (d *userVerificationDal) GetMulti(pkList []int) (map[int]model.UserVerification, error) {
+func (d *verificationDal) GetMulti(pkList []int) (map[int]model.Verification, error) {
 	if len(pkList) == 0 {
 		return nil, apperror.PkListEmpty
 	}
 
-	var mMap = make(map[int]model.UserVerification)
+	var mMap = make(map[int]model.Verification)
 
 	results, err := d.GetLisByPkList(pkList)
 	if err != nil {
@@ -172,25 +172,25 @@ func (d *userVerificationDal) GetMulti(pkList []int) (map[int]model.UserVerifica
 	return mMap, nil
 }
 
-func (d *userVerificationDal) Insert(m *model.UserVerification) error {
+func (d *verificationDal) Insert(m *model.Verification) error {
 	session := d.newSession()
 	err := session.Create(m).Error
 	return err
 }
 
-func (d *userVerificationDal) BatchInsert(bm []*model.UserVerification, batchSize int) (int64, error) {
+func (d *verificationDal) BatchInsert(bm []*model.Verification, batchSize int) (int64, error) {
 	session := d.newSession()
 	err := session.CreateInBatches(bm, batchSize).Error
 	return session.RowsAffected, err
 }
 
-func (d *userVerificationDal) Update(m *model.UserVerification) (int64, error) {
+func (d *verificationDal) Update(m *model.Verification) (int64, error) {
 	session := d.newSession()
 	err := session.Updates(m).Error
 	return session.RowsAffected, err
 }
 
-func (d *userVerificationDal) UpdateBy(f *model.UserVerification, data map[string]any) (int64, error) {
+func (d *verificationDal) UpdateBy(f *model.Verification, data map[string]any) (int64, error) {
 	// where clause
 	session := d.GetSessionByModel(f)
 
@@ -199,7 +199,7 @@ func (d *userVerificationDal) UpdateBy(f *model.UserVerification, data map[strin
 }
 
 // SetInfo 允许 0 和 "" 值，优先使用 Update
-func (d *userVerificationDal) SetInfo(data map[string]any) (int64, error) {
+func (d *verificationDal) SetInfo(data map[string]any) (int64, error) {
 	session := d.newSession()
 
 	if _, ok := data["id"]; !ok {
@@ -213,20 +213,20 @@ func (d *userVerificationDal) SetInfo(data map[string]any) (int64, error) {
 	return session.RowsAffected, err
 }
 
-func (d *userVerificationDal) Delete(pk int) error {
+func (d *verificationDal) Delete(pk int) error {
 	session := d.newSession()
-	err := session.Where("`id` = ?", pk).Delete(model.UserVerification{}).Error
+	err := session.Where("`id` = ?", pk).Delete(model.Verification{}).Error
 	return err
 }
 
-func (d *userVerificationDal) Exec(sql string, values ...interface{}) (int64, error) {
+func (d *verificationDal) Exec(sql string, values ...interface{}) (int64, error) {
 	session := d.newSession()
 	session.Exec(sql, values...)
 	return session.RowsAffected, session.Error
 }
 
-func (d *userVerificationDal) RawGet(sql string) (*model.UserVerification, error) {
-	info := &model.UserVerification{}
+func (d *verificationDal) RawGet(sql string) (*model.Verification, error) {
+	info := &model.Verification{}
 	session := d.newSession()
 	if err := session.Raw(sql).First(info).Error; err != nil {
 		return nil, err
@@ -235,8 +235,8 @@ func (d *userVerificationDal) RawGet(sql string) (*model.UserVerification, error
 	return info, nil
 }
 
-func (d *userVerificationDal) RawFind(sql string) ([]model.UserVerification, error) {
-	var results []model.UserVerification
+func (d *verificationDal) RawFind(sql string) ([]model.Verification, error) {
+	var results []model.Verification
 	session := d.newSession()
 	err := session.Raw(sql).Find(&results).Error
 	if err != nil {
@@ -246,10 +246,10 @@ func (d *userVerificationDal) RawFind(sql string) ([]model.UserVerification, err
 	return results, nil
 }
 
-func (d *userVerificationDal) newEngine() *gorm.DB {
+func (d *verificationDal) newEngine() *gorm.DB {
 	return conf.Config.MysqlDefault.GetDb()
 }
 
-func (d *userVerificationDal) newSession() *gorm.DB {
+func (d *verificationDal) newSession() *gorm.DB {
 	return conf.Config.MysqlDefault.GetSession().Table("t_user_verification")
 }

@@ -4,7 +4,7 @@ import (
 	"donkey-ucenter/app/model"
 	"donkey-ucenter/app/service/iuser"
 	"donkey-ucenter/app/service/iuser/user_def"
-	"donkey-ucenter/app/service/iuser_verification"
+	"donkey-ucenter/app/service/iverification"
 	"donkey-ucenter/conf"
 	"donkey-ucenter/lib/libutils"
 	"errors"
@@ -47,7 +47,7 @@ func (apiSrv *apiSrv) BindEmail(userId int, f *user_def.BindEmailForm) (int, err
 	// 存储userId , 验证码, 绑定时间, 邮箱
 	now := time.Now()
 	expires := now.Add(time.Minute * 10)
-	verifyData := new(model.UserVerification)
+	verifyData := new(model.Verification)
 	verifyData.UserId = userId
 	verifyData.Type = "email_bind"
 	verifyData.Code = code
@@ -55,7 +55,7 @@ func (apiSrv *apiSrv) BindEmail(userId int, f *user_def.BindEmailForm) (int, err
 	verifyData.Status = 1
 	verifyData.CreatedAt = &now
 	verifyData.ExpiresAt = &expires
-	iuser_verification.Srv.Insert(verifyData)
+	iverification.Srv.Insert(verifyData)
 
 	// 发送验证码
 	emailClient := conf.Config.Smtp.GetClient()
@@ -71,7 +71,7 @@ func (apiSrv *apiSrv) BindEmailConfirm(userId int, f *user_def.BindEmailConfirmF
 		return errors.New("验证码不能为空")
 	}
 	// 根据验证码，用户ID 取出绑定时间，邮箱
-	verifyData, err := iuser_verification.Srv.GetBy(&model.UserVerification{
+	verifyData, err := iverification.Srv.GetBy(&model.Verification{
 		UserId: userId,
 		Type:   "email_bind",
 		Target: f.Email,

@@ -4,7 +4,7 @@ import "time"
 
 /*  */
 
-type UserVerification struct {
+type Verification struct {
 	Id        int        `json:"id" form:"id" gorm:"autoIncrement"`                  // 主键ID
 	UserId    int        `json:"user_id" form:"user_id"`                             // 用户ID，0表示未注册用户（注册验证场景）
 	Type      string     `json:"type" form:"type"`                                   // 验证类型: email_register, phone_register, email_bind, phone_bind, email_reset, phone_reset 等
@@ -17,6 +17,6 @@ type UserVerification struct {
 }
 
 // 自定义表名
-func (m *UserVerification) TableName() string {
-	return "t_user_verification"
+func (m *Verification) TableName() string {
+	return "t_verification"
 }

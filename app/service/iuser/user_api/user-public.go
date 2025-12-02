@@ -4,7 +4,7 @@ import (
 	"donkey-ucenter/app/model"
 	"donkey-ucenter/app/service/iuser"
 	"donkey-ucenter/app/service/iuser/user_def"
-	"donkey-ucenter/app/service/iuser_verification"
+	"donkey-ucenter/app/service/iverification"
 	"donkey-ucenter/lib/libutils"
 	"errors"
 	"time"
@@ -32,7 +32,7 @@ func (apiSrv *publicApiSrv) ResetPwdByEmail(f *user_def.ResetPwdForm) error {
 	// 存储userId , 验证码, 绑定时间, 邮箱
 	now := time.Now()
 	expires := now.Add(time.Minute * 10)
-	verifyData := new(model.UserVerification)
+	verifyData := new(model.Verification)
 	verifyData.UserId = 0
 	verifyData.Type = "password_reset"
 	verifyData.Code = code
@@ -40,7 +40,7 @@ func (apiSrv *publicApiSrv) ResetPwdByEmail(f *user_def.ResetPwdForm) error {
 	verifyData.Status = 1
 	verifyData.CreatedAt = &now
 	verifyData.ExpiresAt = &expires
-	err = iuser_verification.Srv.Insert(verifyData)
+	err = iverification.Srv.Insert(verifyData)
 
 	return err
 }
@@ -50,7 +50,7 @@ func (apiSrv *publicApiSrv) ResetPwdConform(f *user_def.ResetPwdConformForm) err
 		return errors.New("邮箱不能为空")
 	}
 
-	verifyData, err := iuser_verification.Srv.GetBy(&model.UserVerification{
+	verifyData, err := iverification.Srv.GetBy(&model.Verification{
 		Type:   "password_reset",
 		Target: f.Email,
 		Code:   f.Code,

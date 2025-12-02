@@ -1,4 +1,4 @@
-package user_verification_api
+package verification_api
 
 /*  */
 
